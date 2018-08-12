@@ -1,4 +1,14 @@
+/**
+ * Double Linked List data structure.
+ *
+ * @date - 08.2018
+ * @auhtor - vasile sambor
+ * @license - MIT
+ */
 class List {
+    /**
+     * initializes the list when <new List()> is called.
+     */
     constructor() {
         this.head = null;
         this.tail = null;
@@ -6,16 +16,22 @@ class List {
     }
 
     /**
-     * Check if the list is empty.
+     * Checks if the list is empty.
      *
      * @returns {boolean} - true if is empty, false otherwise.
      */
     isEmpty() {
-        return this.head === null && this.tail === null;
+        return this.size === 0;
     }
 
+    /**
+     * Appends the specified data to the end of this list.
+     *
+     * @param data - the data to be appended to this list.
+     */
     add(data) {
         const node = new Node(data);
+
         if (!this.head) {
             this.head = this.tail = node;
         } else {
@@ -23,16 +39,46 @@ class List {
             this.tail.next = node;
             this.tail = node;
         }
+
         this.size++;
     }
 
-    clear() {
-        this.head = this.tail = null;
+    /**
+     * Converts the list to array.
+     *
+     * @returns {Array} - the converted array.
+     */
+    toArray() {
+        let array = [];
+        let node = Object.assign({}, this.head);
+
+        while (node) {
+            array.push(node.data);
+            node = node.next;
+        }
+
+        return array;
     }
 
+    /**
+     * Removes all the elements from the list.
+     */
+    clear() {
+        this.head = this.tail = null;
+        this.size = 0;
+    }
+
+    /**
+     * Checks if list contains provided data.
+     *
+     * @param data - data to be checked.
+     *
+     * @return {boolean} - true if contains, false if does not contain or the list is empty.
+     */
     contains(data) {
         if (this.isEmpty()) {
-            throw("List is empty!");
+            console.info("List is empty!");
+            return false;
         }
 
         let node = Object.assign({}, this.head);
@@ -46,9 +92,17 @@ class List {
         return false;
     }
 
+    /**
+     * Gets element by index.
+     *
+     * @param index - position in the list.
+     *
+     * @return {*} - Node data if the index is found, null otherwise.
+     */
     get(index) {
         if (this.isEmpty()) {
-            throw("List is empty!");
+            console.info("List is empty!");
+            return null;
         }
 
         let node = Object.assign({}, this.head);
@@ -63,6 +117,13 @@ class List {
         return null;
     }
 
+    /**
+     * Returns the first index of provided data.
+     *
+     * @param data - data to check the index.
+     *
+     * @return {number} - the position in the list; -1 if is not found or the list is empty.
+     */
     indexOf(data) {
         if (this.isEmpty()) {
             return -1;
@@ -79,6 +140,13 @@ class List {
         }
     }
 
+    /**
+     * Returns the last index of provided data in the list.
+     *
+     * @param data - data to check the
+     *
+     * @return {number} -  the last position in the list; -1 if is not found or the list is empty.
+     */
     lastIndexOf(data) {
         if (this.isEmpty()) {
             return -1;
@@ -99,17 +167,25 @@ class List {
         return lastIndex;
     }
 
+    /**
+     * Removes an element from the list by index.
+     * Note: Throws error if the list is empty.
+     *
+     * @param index - the index to be removed.
+     *
+     * @return {boolean} - true if the element has been successfully removed, false otherwise.
+     */
     removeByIndex(index) {
         if (this.isEmpty()) {
-            throw("List is empty!");
+            throw new Error("List is empty!");
         }
 
         let node = Object.assign({}, this.head);
-        let currIndex = 0
+        let currIndex = 0;
         while (node) {
-            if (currIndex == index) {
+            if (currIndex === index) {
                 // Is Head.
-                if (!node.back) {
+                if (!node.prev) {
                     this.head = this.head.next;
                     this.head.prev = null;
                 }
@@ -120,13 +196,14 @@ class List {
                     this.tail.next = null;
                 }
 
-                // Some node in the chain.
+                // Somewhere in the chain.
                 else {
                     node.prev.next = node.next;
                     node.next.prev = node.prev;
                 }
 
                 node = null;
+                this.size--;
                 return true;
             }
 
@@ -136,16 +213,25 @@ class List {
         return false;
     }
 
+    /**
+     * Removes an element from the list by found data.
+     * Note: Throws error if the list is empty.
+     *
+     * @param data - the index to be removed.
+     * @param first - flag indicates if needs to remove just first found, or all same data; all by default.
+     *
+     * @return {boolean} - true if the element/s has been successfully removed, false otherwise.
+     */
     removeByValue(data, first) {
         if (this.isEmpty()) {
-            throw("List is empty!");
+            throw new Error("List is empty!");
         }
 
         let node = Object.assign({}, this.head);
         while (node) {
             if (data === node.data) {
                 // Is Head.
-                if (!node.back) {
+                if (!node.prev) {
                     this.head = this.head.next;
                     this.head.prev = null;
                 }
@@ -156,11 +242,13 @@ class List {
                     this.tail.next = null;
                 }
 
-                // Some node in the chain.
+                // Somewhere in the chain.
                 else {
                     node.prev.next = node.next;
                     node.next.prev = node.prev;
                 }
+
+                this.size--;
 
                 if (first) {
                     return true;
@@ -172,38 +260,57 @@ class List {
         return false;
     }
 
-    printNode(node) {
-        if (node) {
-            console.log(node.data);
-        }
-    }
-
+    /**
+     * Prints the list in head to tail direction.
+     */
     printForward() {
         if (this.isEmpty()) {
-            throw("List is empty!");
+            console.info("List is empty!");
+            return;
         }
 
         let node = Object.assign({}, this.head);
+        let i = 0;
+        let result = 'Print Forward: \n(';
+        let sep = '';
         while (node) {
-            this.printNode(node);
+            result += sep + `\n  [${i}]: ${JSON.stringify(node.data)}`;
+            sep = ',';
+            i++;
             node = node.next;
         }
+        result += '\n)\n';
+        console.log(result);
     }
 
+    /**
+     * Prints the list in tail to head direction.
+     */
     printBackward() {
         if (this.isEmpty()) {
-            throw("List is empty!");
+            console.info("List is empty!");
+            return;
         }
 
         let node = Object.assign({}, this.tail);
+        let i = this.size - 1;
+        let result = 'Print Backward: \n(';
+        let sep = '';
         while (node) {
-            this.printNode(node);
-            node = node.tail;
+            result += sep + `\n  [${i}]: ${JSON.stringify(node.data)}`;
+            sep = ',';
+            i--;
+            node = node.prev;
         }
+        result += '\n)\n';
+        console.log(result);
     }
-}
+};
 
-
+/**
+ * Represents a link chain component, specific to linked list structure.
+ * It holds the data and links to other nodes in the list.
+ */
 class Node {
     constructor(data = null, next = null, prev = null) {
         this.data = data;
@@ -212,30 +319,4 @@ class Node {
     }
 }
 
-
-function test() {
-    const list = new List();
-
-    list.add(1);
-    list.add(2);
-    list.add(3);
-    list.add(4);
-    list.add(2);
-
-    console.log('contains(3): ' + list.contains(3));
-    console.log('indexOf(2): ' + list.indexOf(2));
-    console.log('lastIndexOf(2): ' + list.lastIndexOf(2));
-    console.log('get(2): ' + list.get(2));
-    console.log('length(): ' + list.length());
-
-    list.add(5);
-    list.add(6);
-
-    list.printForward();
-
-    console.log('length(): ' + list.length());
-
-    list.removeByValue(2);
-
-    list.printForward();
-}
+module.exports = List;
